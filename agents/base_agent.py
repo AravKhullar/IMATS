@@ -1,13 +1,18 @@
-class BaseAgent:
-    def __init__(self, name, initial_cash):
+from abc import ABC, abstractmethod
+
+class BaseAgent(ABC):
+    def __init__(self, name):
         self.name = name
-        self.cash = initial_cash
-        self.portfolio = {}
 
-    def act(self, market):
-        """Decide on an action given the current market state."""
-        raise NotImplementedError
+    @abstractmethod
+    def act(self, state):
+        """
+        Decide what to do given the current market state.
 
-    def update(self, reward, new_state):
-        """Update agent's internal state after taking an action."""
-        raise NotImplementedError 
+        Parameters:
+            state (dict): Contains current step, prices, etc.
+
+        Returns:
+            dict: Example: {"stock": "TSLA", "type": "buy"}
+        """
+        pass

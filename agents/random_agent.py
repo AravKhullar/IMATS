@@ -1,9 +1,12 @@
-from .base_agent import BaseAgent
+from agents.base_agent import BaseAgent
+import random
 
 class RandomAgent(BaseAgent):
-    def act(self, market):
-        """Randomly decide to buy, sell, or hold."""
-        pass
+    def __init__(self, name, stocks):
+        super().__init__(name)
+        self.stocks = stocks
 
-    def update(self, reward, new_state):
-        pass 
+    def act(self, state):
+        stock = random.choice(self.stocks)
+        action = random.choice(["buy", "sell", "hold"])
+        return {"stock" : stock, "action" : action}

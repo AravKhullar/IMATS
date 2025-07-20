@@ -1,48 +1,58 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 from market import Market
 from agents.random_agent import RandomAgent
 from agents.q_learning_agent import QLearningAgent
+import tools
+import os
 
 
 def main():
-    # Load historical price data (stub)
-    price_data = pd.DataFrame()  # Replace with actual data loading
+    data = tools.load_stock_data("data/stock_prices.csv")
+    stock_list = list(data.columns)
+    
+    market = Market(data)
+    market.register_agent("random", 10000)
+    market.register_agent("qlearner", 10000)
 
-    # Initialize market
-    market = Market(price_data)
+    agents = {
+        "random":RandomAgent("random", stock_list),
+        "qlearner":QLearningAgent("qlearner", stock_list, alpha = 1, epsilon = 1)
+    }
 
-    # Initialize agents
-    agents = [
-        RandomAgent("RandomAgent", initial_cash=10000),
-        QLearningAgent("QLearningAgent", initial_cash=10000)
-    ]
+    if os.path.exists("data/q_table.pkl"):
+        tools.load_q_table(agents["qlearner"], "data/q_table.pkl")
+        print(f"Q-table loaded with {len(agents['qlearner'].q_table)} states.")
 
-    # Track portfolio values
-    portfolio_history = {agent.name: [] for agent in agents}
 
-    # Simulation loop (stub)
-    for step in range(100):  # Replace 100 with actual number of steps
-        for agent in agents:
-            action = agent.act(market)
-            # Apply action to market/portfolio (stub)
-            # ...
-            # Calculate reward and update agent (stub)
-            reward = 0
-            agent.update(reward, None)
-            # Track portfolio value (stub)
-            portfolio_history[agent.name].append(agent.cash)  # Replace with actual portfolio value
-        market.step()
+    while market.current_step < len(data) - 1:
+        state = market.get_state()
+        for name, agent in agents.items():
+            action = agent.act(state)
+            old_value = market.get_agent_value(name)
 
-    # Plot results
-    for name, values in portfolio_history.items():
-        plt.plot(values, label=name)
-    plt.xlabel('Time Step')
-    plt.ylabel('Portfolio Value')
-    plt.legend()
-    plt.title('Agent Portfolio Values Over Time')
-    plt.show()
+            market.step(name, action)
+            new_value = market.get_agent_value(name)
+            reward = new_value - old_value
+
+            if hasattr(agent, "update"):
+                agent.update(reward, market.get_state())
+                epsilon = max(0.01, agent.epsilon * 0.98)
+                agent.epsilon = epsilon
+                agent.alpha = max(0.05, agent.alpha * 0.95)
+
+        
+        market.next()
+
+    for name in agents:
+        history = market.get_history(name)
+        final_value = history[-1]["value"]
+        print(f"{name} final portfolio value: ${final_value:.2f}")
+        
+    tools.plot_results(market, agents)
+
+    tools.save_q_table(agents["qlearner"], "data/q_table.pkl")
+    print(f"Q-table now has {len(agents['qlearner'].q_table)} states after training.")
+
+
 
 
 if __name__ == "__main__":
