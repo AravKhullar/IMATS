@@ -2,3 +2,9 @@ pandas
 numpy
 matplotlib 
 yfinance
+langchain-community
+langchain-openai
+langchain
+python-dotenv
+duckduckgo-search
+pydantic

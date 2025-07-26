@@ -3,7 +3,7 @@ import pandas as pd
 class Market:
     def __init__(self, price_data: pd.DataFrame):
         self.price_data = price_data.reset_index(drop=True)
-        self.stocks = price_data.columns
+        self.stocks = [col for col in price_data.columns if col != "Date"]
         self.current_step = 0
         self.agents = {}
 
@@ -17,8 +17,10 @@ class Market:
     def get_state(self):
         row = self.price_data.loc[self.current_step]
         prices = {stock: row[stock] for stock in self.stocks}
+        date = self.price_data.loc[self.current_step, "Date"]
         return {
             "step": self.current_step,
+            "date": date,
             "prices": prices
         } 
 

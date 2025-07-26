@@ -1,5 +1,6 @@
 import yfinance as yf
 import pandas as pd
+from datetime import datetime
 import os
 
 def download_data(tickers, start_date, end_date, filename="data/stock_prices.csv"):
@@ -22,7 +23,7 @@ def download_data(tickers, start_date, end_date, filename="data/stock_prices.csv
     
     if isinstance(tickers, str):
         adj_close.columns = [tickers]
-    elif len(tickers) == 1:
+    elif len(tickers) == 1: 
         adj_close.columns = [tickers[0]]
 
     adj_close.dropna().to_csv(filename)
@@ -30,4 +31,5 @@ def download_data(tickers, start_date, end_date, filename="data/stock_prices.csv
 
 if __name__ == "__main__":
     tickers = ["TSLA", "AAPL", "NVDA", "MSFT", "GOOG"]
-    download_data(tickers, start_date="2022-01-01", end_date="2025-01-01")
+    today = datetime.today().strftime("%Y-%m-%d")
+    download_data(tickers, start_date="2022-01-01", end_date=today)

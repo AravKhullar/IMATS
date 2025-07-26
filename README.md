@@ -16,5 +16,6 @@ IMASTS is a Python framework for simulating multiple trading agents operating in
 2. Fill in the logic for agents and market in the provided scaffolding.
 3. Run the simulation:
    ```bash
+   python fetch_data.py
    python main.py
    ```

@@ -16,7 +16,8 @@ class QLearningAgent(BaseAgent):
         return self.q_table.get((state_key, action), 0.0)
 
     def act(self, state):
-        state_key = tuple(round(state["prices"][stock], -1) for stock in self.stocks)
+        sentiment = state.get("sentiment", 0)
+        state_key = tuple(round(state["prices"][stock], -1) for stock in self.stocks) + (sentiment,)
         possible_actions = []
         for stock in self.stocks:
             possible_actions.extend([
@@ -39,7 +40,8 @@ class QLearningAgent(BaseAgent):
     def update(self, reward, new_state):
         if self.last_state is None or self.last_action is None:
             return
-        new_state_key = tuple(round(new_state["prices"][stock], -1) for stock in self.stocks)
+        sentiment = new_state.get("sentiment", 0)
+        new_state_key = tuple(round(new_state["prices"][stock], -1) for stock in self.stocks) + (sentiment,)
         future_qs = [
             self.get_q(new_state_key, (s, a))
             for s in self.stocks
